@@ -1496,11 +1496,11 @@
             console.log("Merlion V5 created. Total Height approx 6.0m");
         }
 
-        // --- SKY PARKOUR CHALLENGE (WITH TAIPEI 101) ---
+        // --- SKY PARKOUR CHALLENGE ---
         function createParkourCourse(startX, startZ) {
             const mat = new THREE.MeshStandardMaterial({ color: 0x8B4513, roughness: 0.8 }); // Wood/Earth
 
-            // 5 stepping pillars leading to Taipei 101
+            // 5 stepping pillars leading to final platform
             const pillars = [
                 // 1. Starter platform
                 { x: 0, z: 0, w: 3, d: 3, h: 1.5 },
@@ -1531,106 +1531,28 @@
                 });
             });
 
-            // --- TAIPEI 101 BUILDING ---
-            const t101X = startX + 5;
-            const t101Z = startZ - 3;
-            const t101Group = new THREE.Group();
-            t101Group.position.set(t101X, 0, t101Z);
-            scene.add(t101Group);
+            // --- FINAL PLATFORM ---
+            const finalX = startX + 5;
+            const finalZ = startZ - 3;
+            const finalHeight = 10.0;
+            
+            const finalGeo = new THREE.BoxGeometry(4, finalHeight, 4);
+            const finalMesh = new THREE.Mesh(finalGeo, mat);
+            finalMesh.position.set(finalX, finalHeight / 2, finalZ);
+            finalMesh.castShadow = true;
+            finalMesh.receiveShadow = true;
+            scene.add(finalMesh);
 
-            // Materials
-            const glassMat = new THREE.MeshStandardMaterial({ color: 0x1a7a7a, roughness: 0.3, metalness: 0.6 }); // Teal glass
-            const frameMat = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.5, metalness: 0.4 }); // Dark frame
-            const goldMat = new THREE.MeshStandardMaterial({ color: 0xFFD700, metalness: 0.8, roughness: 0.2 }); // Gold accent
-
-            // 8 stacked tiers with tapering width
-            const tiers = [
-                { w: 4.0, d: 4.0, h: 1.2 },
-                { w: 3.6, d: 3.6, h: 1.1 },
-                { w: 3.2, d: 3.2, h: 1.0 },
-                { w: 2.8, d: 2.8, h: 1.0 },
-                { w: 2.5, d: 2.5, h: 0.9 },
-                { w: 2.2, d: 2.2, h: 0.9 },
-                { w: 1.9, d: 1.9, h: 0.8 },
-                { w: 1.6, d: 1.6, h: 0.8 }
-            ];
-
-            let currentY = 0;
-            tiers.forEach((tier, idx) => {
-                // Each tier has a main box + a thin frame/accent on top
-                const box = new THREE.Mesh(
-                    new THREE.BoxGeometry(tier.w, tier.h, tier.d),
-                    glassMat
-                );
-                box.position.y = currentY + tier.h / 2;
-                box.castShadow = true;
-                box.receiveShadow = true;
-                t101Group.add(box);
-
-                // Frame ring on top of each tier
-                const frame = new THREE.Mesh(
-                    new THREE.BoxGeometry(tier.w + 0.1, 0.08, tier.d + 0.1),
-                    frameMat
-                );
-                frame.position.y = currentY + tier.h;
-                t101Group.add(frame);
-
-                currentY += tier.h;
-            });
-
-            // Rooftop observation deck (MADE WIDER AND THICKER)
-            const rooftopH = 0.6; // Was 0.3
-            const rooftop = new THREE.Mesh(
-                new THREE.BoxGeometry(3.5, rooftopH, 3.5), // Was 2.0x2.0
-                frameMat
-            );
-            rooftop.position.y = currentY + rooftopH / 2;
-            t101Group.add(rooftop);
-            currentY += rooftopH;
-
-            // Optional extra padding tier for visual support
-            const rooftopPad = new THREE.Mesh(
-                new THREE.BoxGeometry(3.8, 0.2, 3.8),
-                frameMat
-            );
-            rooftopPad.position.y = currentY - rooftopH/2 - 0.1;
-            t101Group.add(rooftopPad);
-
-            // Spire / Antenna
-            const spireH = 2.5;
-            const spire = new THREE.Mesh(
-                new THREE.CylinderGeometry(0.05, 0.15, spireH, 8),
-                goldMat
-            );
-            spire.position.y = currentY + spireH / 2;
-            spire.castShadow = true;
-            t101Group.add(spire);
-
-            // Gold ball at base of spire
-            const ball = new THREE.Mesh(
-                new THREE.SphereGeometry(0.25, 16, 16),
-                goldMat
-            );
-            ball.position.y = currentY + 0.15;
-            t101Group.add(ball);
-
-            // INCREASE PLATFORM HEIGHT to force double jump
-            const heightBoost = 2.0; 
-            t101Group.position.y += heightBoost;
-            currentY += heightBoost;
-
-            // Platform physics for the rooftop (landing area) - EXPANDED BOUNDS
-            const rooftopHeight = currentY; // Total height of tiers + rooftop + boost
             state.platforms.push({
-                minX: t101X - 1.75, // Half of 3.5
-                maxX: t101X + 1.75,
-                minZ: t101Z - 1.75,
-                maxZ: t101Z + 1.75,
-                height: rooftopHeight
+                minX: finalX - 2,
+                maxX: finalX + 2,
+                minZ: finalZ - 2,
+                maxZ: finalZ + 2,
+                height: finalHeight
             });
 
-            // Sky Treasure chest on rooftop (Singapore video card)
-            createChest(t101X, t101Z, 0xFFD700, "Sky Treasure", true, rooftopHeight);
+            // Sky Treasure chest on final platform
+            createChest(finalX, finalZ, 0xFFD700, "Sky Treasure", true, finalHeight);
         }
 
         function updateWater() {
